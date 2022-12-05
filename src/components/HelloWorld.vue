@@ -6,59 +6,11 @@
       </v-col>
     </v-row>
     <v-row class="ma-auto">
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="one" @click="updateDisplay(one)">1</v-btn>
+      <v-col cols="3" class="pa-6 d-flex justify-center" v-for="numBtn in calculatorNumbers" :key="numBtn.id">
+        <v-btn :numBtn="numBtn" outlined class="num-btn" @click="updateDisplay(numBtn.btnValue)">{{numBtn.numName}}</v-btn>
       </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="two" @click="updateDisplay(two)">2</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="three" @click="updateDisplay(three)">3</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" @click="chooseOperator('add')">+</v-btn>
-      </v-col>
-    </v-row>
-    <v-row class="ma-auto">
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="four" @click="updateDisplay(four)">4</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="five" @click="updateDisplay(five)">5</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="six" @click="updateDisplay(six)">6</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn">-</v-btn>
-    </v-col>
-    </v-row>
-    <v-row class="ma-auto">
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="seven" @click="updateDisplay(seven)">7</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="eight" @click="updateDisplay(eight)">8</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn" v-model="nine" @click="updateDisplay(nine)">9</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-        <v-btn outlined class="fb-btn">x</v-btn>
-      </v-col>
-    </v-row>
-    <v-row class="ma-auto">
-      <v-col cols="3" class="pa-6 d-flex justify-center" >
-        <v-btn outlined class="fb-btn" @click="clear">C</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-          <v-btn outlined class="fb-btn" v-model="zero" @click="updateDisplay(zero)">0</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-          <v-btn outlined class="fb-btn">=</v-btn>
-      </v-col>
-      <v-col cols="3" class="pa-6 d-flex justify-center">
-          <v-btn outlined class="fb-btn">/</v-btn>
+      <v-col cols="3" class="pa-6 d-flex justify-center" v-for="funcBtn in calculatorFunctions" :key="funcBtn.id">
+        <v-btn :funcBtn="funcBtn" outlined class="func-btn" :color="funcBtn.btnColor ? funcBtn.btnColor : inherit" @click="chooseFunction(funcBtn.func)">{{funcBtn.funcName}}</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -71,18 +23,30 @@
     data: () => ({
       displayValue: '',
       firstOperand: null,
-      waitingForSecondOperand: false,
+      secondOperand: null,
+      isWaitingForSecondOperand: false,
       operator: null,
-      one: 1,
-      two: 2,
-      three: 3,
-      four: 4,
-      five: 5,
-      six: 6,
-      seven: 7,
-      eight: 8,
-      nine: 9,
-      zero: 0,
+      calculatorNumbers: [
+        { id: 1, numName: '1', btnValue: 1 },
+        { id: 2, numName: '2', btnValue: 2 },
+        { id: 3, numName: '3', btnValue: 3 },
+        { id: 4, numName: '4', btnValue: 4 },
+        { id: 5, numName: '5', btnValue: 5 },
+        { id: 6, numName: '6', btnValue: 6 },
+        { id: 7, numName: '7', btnValue: 7 },
+        { id: 8, numName: '8', btnValue: 8 },
+        { id: 9, numName: '9', btnValue: 9 },
+        { id: 10, numName: '0', btnValue: 0 },
+      ],
+      calculatorFunctions: [
+        { id: 11, funcName: '+', btnValue: '+', func: 'add' },
+        { id: 12, funcName: '-', btnValue: '-', func: 'subtract' },
+        { id: 13, funcName: 'x', btnValue: '*', func: 'multiply' },
+        { id: 14, funcName: '/', btnValue: '/', func: 'divide' },
+        { id: 15, funcName: 'C', btnValue: 'c', func: 'clearDisplay', btnColor: 'red' },
+        { id: 16, funcName: '.', btnValue: '.' },
+        { id: 17, funcName: '=', btnValue: '=', func: 'solve', btnColor: 'green' },
+      ]
     }),
     methods: {
       logEvent(e){
@@ -95,23 +59,50 @@
       //                                                                                                    operator: null
       //                                                                                                  }
       // I should make an instance of a calculator to track the values instead of tracking individually like it is
-      clear(){this.displayValue = ''},
-      appendNum(num){ this.firstOperand= num },
-      chooseOperator(operation){ 
-        this.firstOperand = this.displayValue 
-        if(operation == 'add'){
-          this.operator = '+'
-        }else if(operation == 'subtract'){
-          this.operator = '-'
-        }else if(operation == 'multiply'){
-          this.operator = '*'
-        }else{
-          this.operator = '/'
-        }
-        this.displayValue = this.firstOperand + this.operator
-        console.log("Your equation so far is: " + this.firstOperand + ' ' + this.operator)
-      },
-      compute(){},
+      clearDisplay(){this.displayValue = ''},
+      adding(){console.log('Adding...')},
+      subtract(){console.log('Subtracting...')},
+      multiply(){console.log('Multiplying...')},
+      divide(){console.log('Dividing...')},
+      solve(){console.log('Solving...')},
+      
+      chooseFunction(str){
+          this.firstOperand = this.displayValue
+          this.isWaitingForSecondOperand = true
+          if(str == 'add' && this.operator === null){
+            this.adding()
+            this.operator = '+'
+            this.displayValue = this.operator
+            console.log("Your equation so far is: " + this.firstOperand + this.operator)
+          }else if(str == 'subtract' && this.operator === null){
+            this.subtract()
+            this.operator = '-'
+            this.displayValue = this.firstOperand + this.operator
+            console.log("Your equation so far is: " + this.firstOperand + ' ' + this.operator)
+          }else if(str == 'multiply' && this.operator === null){
+            this.multiply()
+            this.operator = '*'
+            this.displayValue = this.firstOperand + this.operator
+            console.log("Your equation so far is: " + this.firstOperand + ' ' + this.operator)
+          }else if(str == 'divide' && this.operator === null){
+            this.divide()
+            this.operator = '/'
+            this.displayValue = this.firstOperand + this.operator
+            console.log("Your equation so far is: " + this.firstOperand + ' ' + this.operator)
+          }else if(str == 'clearDisplay'){
+            // this.operator = null
+            // this.firstOperand = null
+            console.log(this.operator, this.firstOperand)
+            this.displayValue = ''
+          }else if(str == 'decimal'){
+            this.displayValue += '.'
+          }
+          else{
+            this.solve()
+            this.operator = '='
+          }
+        },
+      
       updateDisplay(item){ 
         this.displayValue += item
         }
@@ -119,8 +110,12 @@
   }
 </script>
 <style lang="scss" scoped>
-.fb-btn.v-btn--outlined {
+.num-btn.v-btn--outlined {
   border: thin solid aqua;
   color: aqua;
+}
+.func-btn.v-btn--outlined {
+  border: thin solid whitesmoke;
+  color: whitesmoke;
 }
 </style>
